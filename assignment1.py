@@ -60,12 +60,11 @@ def main():
             possibleCiphertextVector = []
             for pl, kh in cl_indices:
                 for ph, kl in ch_indices:
-                    if isPrintableAscii(ph << 4 | pl):
+                    if isPrintableAscii(ph << 4 | pl) and isValidAscii(kh << 4 | kl):
                         possibleCiphertextVector.append(chr(ph << 4 | pl))
-                    if isValidAscii(kh << 4 | kl):
                         possibleKeyCharacterVector.append(chr(kh << 4 | kl))
 
             possibleKeyMatrix.append(possibleKeyCharacterVector)
             possibleCiphertextMatrix.append(possibleCiphertextVector)
-        print possibleCiphertextMatrix
+            print possibleKeyCharacterVector
 main()
