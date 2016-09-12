@@ -22,9 +22,6 @@ hashMap = [
 upperMask = 0xF0
 lowerMask = 0x0F
 
-def convertFoundToPossibilities(inverse_ch, inverse_cl):
-    
-
 def encrypt(character, key_character):
     binary_char = ord(character)
     binary_key = ord(key_character)
@@ -35,27 +32,40 @@ def encrypt(character, key_character):
     mapped = hashMap[ph][kl] << 4 | hashMap[pl][kh]
     return mapped
 
-def findIndex2dArray(arr, item):
+def findIndices2dArray(arr, item):
     matching = []
-    for i in range(len(arr)):
-        for j in range(len(arr[0])):
-            if (arr[i][j] == item):
-                matching.append((i, j))
+    for p in range(len(arr)):
+        for k in range(len(arr[0])):
+            if (arr[p][k] == item):
+                matching.append((p, k))
     return matching
+
+def isPrintableAscii(hex):
+    return hex >= 32 and hex < 127
+
+def isValidAscii(hex):
+    return hex >= 0 and hex <= 127
 
 def main():
     for line in sys.stdin:
         normal = []
+        possibleKeyMatrix = []
+        possibleCiphertextMatrix = []
         for byte in line:
-            ch = ord(byte) & upperMask
+            ch = (ord(byte) & upperMask) >> 4
             cl = ord(byte) & lowerMask
-            inverse_ch = findIndex2dArray(hashMap, ch)
-            inverse_cl = findIndex2dArray(hashMap, cl)
+            ch_indices = findIndices2dArray(hashMap, ch)
+            cl_indices = findIndices2dArray(hashMap, cl)
+            possibleKeyCharacterVector = []
+            possibleCiphertextVector = []
+            for pl, kh in cl_indices:
+                for ph, kl in ch_indices:
+                    if isPrintableAscii(ph << 4 | pl):
+                        possibleCiphertextVector.append(chr(ph << 4 | pl))
+                    if isValidAscii(kh << 4 | kl):
+                        possibleKeyCharacterVector.append(chr(kh << 4 | kl))
 
-#main()
-test = 'hello how are you'
-key = '12345678901234567'
-encrypted = ''
-for i in range(len(test)):
-    encrypted_char = encrypt(test[i], key[i])
-    encrypted += chr(encrypted_char)
+            possibleKeyMatrix.append(possibleKeyCharacterVector)
+            possibleCiphertextMatrix.append(possibleCiphertextVector)
+        print possibleCiphertextMatrix
+main()
