@@ -22,6 +22,47 @@ hashMap = [
 upperMask = 0xF0
 lowerMask = 0x0F
 
+def findCandidateLetters(matrix):
+    for letter in matrix[0]:
+        distances = []
+        for i in range(1, len(matrix)):
+            if letter in matrix[i]:
+                distances.append(i)
+        print letter, distances
+        #in order for any key to be valid, the remaining letters would have to
+        #occur at indices in between these distances
+
+def breadthFirstSearchSequences(matrix):
+
+    candidateKeys = []
+    queue = matrix[0]
+    i = 0
+    while len(queue) > 0:
+
+        testSequence = queue.pop(0)
+
+        if assertSequenceRepeatsThroughMatrix(testSequence, matrix):
+            candidateKeys.append(testSequence)
+
+        for letter in matrix[i]:
+            queue.append(testSequence + letter)
+
+        i += 1
+
+    return candidateKeys
+
+def assertSequenceRepeatsThroughMatrix(sequence, matrix):
+    j = 0
+    i = 0
+    while i < len(matrix):
+        if j >= len(sequence) - 1:
+            j = 0
+        if sequence[j] not in matrix[i]:
+            return False
+        i += 1
+        j += 1
+    return True
+
 def encrypt(character, key_character):
     binary_char = ord(character)
     binary_key = ord(key_character)
@@ -66,5 +107,7 @@ def main():
 
             possibleKeyMatrix.append(possibleKeyCharacterVector)
             possibleCiphertextMatrix.append(possibleCiphertextVector)
-            print possibleKeyCharacterVector
+
+    findCandidateLetters(possibleKeyMatrix)
+
 main()
