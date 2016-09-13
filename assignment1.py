@@ -22,46 +22,22 @@ hashMap = [
 upperMask = 0xF0
 lowerMask = 0x0F
 
+def buildSequenceFromLetter(letter, matrix):
+    
+
+def findIndicesOfLetterReoccurence(letter, matrix, i):
+    indices = []
+    for i in range(i, len(matrix)):
+        if letter in matrix[i]:
+            indices.append(i)
+    return indices
+
 def findCandidateLetters(matrix):
-    for letter in matrix[0]:
-        distances = []
-        for i in range(1, len(matrix)):
-            if letter in matrix[i]:
-                distances.append(i)
-        print letter, distances
-        #in order for any key to be valid, the remaining letters would have to
-        #occur at indices in between these distances
-
-def breadthFirstSearchSequences(matrix):
-
-    candidateKeys = []
-    queue = matrix[0]
-    i = 0
-    while len(queue) > 0:
-
-        testSequence = queue.pop(0)
-
-        if assertSequenceRepeatsThroughMatrix(testSequence, matrix):
-            candidateKeys.append(testSequence)
-
-        for letter in matrix[i]:
-            queue.append(testSequence + letter)
-
-        i += 1
-
-    return candidateKeys
-
-def assertSequenceRepeatsThroughMatrix(sequence, matrix):
-    j = 0
-    i = 0
-    while i < len(matrix):
-        if j >= len(sequence) - 1:
-            j = 0
-        if sequence[j] not in matrix[i]:
-            return False
-        i += 1
-        j += 1
-    return True
+    for i in range(len(matrix)):
+        row = matrix[i]
+        for letter in row:
+            indices = findIndicesOfLetterReoccurence(letter, matrix, i)
+            print letter, indices
 
 def encrypt(character, key_character):
     binary_char = ord(character)
