@@ -19,35 +19,48 @@ hashMap = [
    [0xe, 0xf, 0x7, 0x6, 0x4, 0x5, 0x1, 0x0, 0x2, 0x3, 0xb, 0xa, 0x8, 0x9, 0xd, 0xc]
 ];
 
-upperMask = 0xF0
-lowerMask = 0x0F
-
-def buildSequenceFromLetter(letter, matrix):
-    
-
-def findIndicesOfLetterReoccurence(letter, matrix, i):
-    indices = []
-    for i in range(i, len(matrix)):
-        if letter in matrix[i]:
-            indices.append(i)
-    return indices
-
-def findCandidateLetters(matrix):
-    for i in range(len(matrix)):
-        row = matrix[i]
-        for letter in row:
-            indices = findIndicesOfLetterReoccurence(letter, matrix, i)
-            print letter, indices
+def splitByte(byte):
+    upperMask = 0xF0
+    lowerMask = 0x0F
+    ch = (ord(byte) & upperMask) >> 4
+    cl = ord(byte) & lowerMask
+    return ch, cl
 
 def encrypt(character, key_character):
-    binary_char = ord(character)
-    binary_key = ord(key_character)
-    ph = (binary_char & 0xF0) >> 4
-    pl = binary_char & 0x0F
-    kh = (binary_key & 0xF0) >> 4
-    kl = binary_key & 0x0F
+    ph, pl = splitByte(character)
+    kh, kl = splitByte(key_character)
     mapped = hashMap[ph][kl] << 4 | hashMap[pl][kh]
     return mapped
+
+def decryptTextUsingKey(text, key):
+    repeated_key = ""
+    invalid_indexes = []
+    valid_indexes = []
+    while len(repeated_key) < len(text):
+        repeated_key += key
+    
+    slicedKey = repeated_key[0 : len(text)]
+    decryption = ""
+    for i in range(len(text)):
+        decrypted_char = decrypt(text[i], slicedKey[i])
+        if not isPrintableAscii(ord(decrypted_char)):
+            invalid_indexes.append(i)
+        else:
+            valid_indexes.append(i)
+        decryption += decrypt(text[i], slicedKey[i])
+    return decryption, valid_indexes, invalid_indexes
+
+def decrypt(ciphertext_char, key_char):
+    ch, cl = splitByte(ciphertext_char)
+    kh, kl = splitByte(key_char)
+    ph = findIndiceKnowingColumn(hashMap, kl, ch)
+    pl = findIndiceKnowingColumn(hashMap, kh, cl)
+    return chr(ph << 4 | pl)
+    
+def findIndiceKnowingColumn(arr, col, item):
+    for p in range(len(arr)):
+        if arr[p][col] == item:
+            return p
 
 def findIndices2dArray(arr, item):
     matching = []
@@ -64,26 +77,37 @@ def isValidAscii(hex):
     return hex >= 0 and hex <= 127
 
 def main():
+    text = ""
     for line in sys.stdin:
-        normal = []
+        text += line
         possibleKeyMatrix = []
-        possibleCiphertextMatrix = []
+        possiblePlaintextMatrix = []
         for byte in line:
-            ch = (ord(byte) & upperMask) >> 4
-            cl = ord(byte) & lowerMask
+            ch, cl = splitByte(byte)
             ch_indices = findIndices2dArray(hashMap, ch)
             cl_indices = findIndices2dArray(hashMap, cl)
             possibleKeyCharacterVector = []
-            possibleCiphertextVector = []
+            possiblePlaintextVector = []
             for pl, kh in cl_indices:
                 for ph, kl in ch_indices:
                     if isPrintableAscii(ph << 4 | pl) and isValidAscii(kh << 4 | kl):
-                        possibleCiphertextVector.append(chr(ph << 4 | pl))
+                        possiblePlaintextVector.append(chr(ph << 4 | pl))
                         possibleKeyCharacterVector.append(chr(kh << 4 | kl))
 
             possibleKeyMatrix.append(possibleKeyCharacterVector)
-            possibleCiphertextMatrix.append(possibleCiphertextVector)
-
-    findCandidateLetters(possibleKeyMatrix)
+            possiblePlaintextMatrix.append(possiblePlaintextVector)
+    
+    candidates = []
+    for row in possibleKeyMatrix:
+        max_val = 0
+        best_fit = ""
+        for char in row:
+            text, valid, invalid = decryptTextUsingKey(text, char)
+            if len (valid) > max_val:
+                max_val = len(valid)
+                best_fit = char
+        candidates.append((best_fit, max_val))
+    candidates.sort(key=lambda tup: tup[1])
+    print candidates
 
 main()
