@@ -147,18 +147,4 @@ def main():
             possibleKeyMatrix.append(possibleKeyCharacterVector)
             possiblePlaintextMatrix.append(possiblePlaintextVector)
 
-    repititionMatrix = []
-    for row in possibleKeyMatrix:
-        matrix_row = []
-        for char in row:
-            indices = findPossiblePositionsForCharacter(possibleKeyMatrix, char)
-            stats = {
-                "char": char,
-                "repitition_intervals": findRepititionIntervalsForLetter(text, indices)
-            }
-            if not len(stats['repitition_intervals']) == 0:
-                matrix_row.append(stats)
-        repititionMatrix.append(matrix_row)
-    print intervals
-
 main()
