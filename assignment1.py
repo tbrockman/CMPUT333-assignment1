@@ -1,4 +1,5 @@
 import sys
+import argparse
 
 hashMap = [
    [0xf, 0x7, 0x6, 0x4, 0x5, 0x1, 0x0, 0x2, 0x3, 0xb, 0xa, 0x8, 0x9, 0xd, 0xc, 0xe],
@@ -19,10 +20,7 @@ hashMap = [
    [0xe, 0xf, 0x7, 0x6, 0x4, 0x5, 0x1, 0x0, 0x2, 0x3, 0xb, 0xa, 0x8, 0x9, 0xd, 0xc]
 ];
 
-# For a given vector of indices of appearence for a letter in the ciphertext,
-# this should return possible repetition distances
-
-intervals = {}
+keys = [chr(0x50) + chr(0x2f) + chr(0x08) + chr(0x7c) + chr(0x5f) + chr(0x30) + chr(0x00)]
 
 def findRepititionIntervalsForLetter(text, letter_vector):
     distances = []
@@ -43,11 +41,6 @@ def findRepititionIntervalsForLetter(text, letter_vector):
             elif compare2 - compare1 == test_distance:
                 compare1 = compare2
 
-        if not fail:
-            if test_distance in intervals:
-                intervals[test_distance] += 1
-            else:
-                intervals[test_distance] = 1
             distances.append(test_distance)
 
     return distances
@@ -118,7 +111,7 @@ def isPrintableAscii(char):
 def isValidAscii(char):
     return ord(char) >= 0 and ord(char) <= 127
 
-def main():
+def createPossiblePlaintextAndKeyMatrices():
     text = ""
     possibleKeyMatrix = []
     possiblePlaintextMatrix = []
@@ -139,12 +132,27 @@ def main():
                         possibleKeyCharacterVector.append(key_char)
             possibleKeyMatrix.append(possibleKeyCharacterVector)
             possiblePlaintextMatrix.append(possiblePlaintextVector)
+    return possiblePlaintextMatrix, possibleKeyMatrix
 
-def getText():
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Decrypt ciphertext giving from stdin using a specified key, following the encryption scheme specified in CMPUT 333 Assigment 1")
+    parser.add_argument('-k', '--key', help='Specify a key to use to decrypt the ciphertext passed from stdin.')
+    parser.add_argument('-knum', '--key-number', help='Use an already found key [1, 2, 3] corresponding to the keys for Ciphertext1, Ciphertext2, and Ciphertext3 respectively.')
+    parser.add_argument('-f', '--file', help='A file name to be used as input instead of stdin.')
+    args = parser.parse_args()
+
+    if args.file:
+        f = open(args.file, 'r')
+    else:
+        f = sys.stdin
+
     text = ""
-    for line in sys.stdin:
+    for line in f:
         text += line
-    return text
-
-text = getText()
-print decryptTextUsingKey(text, 'P/' + chr(0x08) + chr(0x7c) + chr(0x5f) + chr(0x30) + chr(0x00))
+    
+    if args.key:
+        print decryptTextUsingKey(text, args.key)
+    elif args.key_number:
+        print decryptTextUsingKey(text, keys[int(args.key_number) - 1])
+    else:
+        print decryptTextUsingKey(text, keys[0])
