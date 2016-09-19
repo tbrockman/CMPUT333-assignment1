@@ -34,21 +34,14 @@ def encrypt(character, key_character):
 
 def decryptTextUsingKey(text, key):
     repeated_key = ""
-    invalid_indexes = []
-    valid_indexes = []
     while len(repeated_key) < len(text):
         repeated_key += key
     
     slicedKey = repeated_key[0 : len(text)]
     decryption = ""
     for i in range(len(text)):
-        decrypted_char = decrypt(text[i], slicedKey[i])
-        if not isPrintableAscii(ord(decrypted_char)):
-            invalid_indexes.append(i)
-        else:
-            valid_indexes.append(i)
         decryption += decrypt(text[i], slicedKey[i])
-    return decryption, valid_indexes, invalid_indexes
+    return decryption
 
 def decrypt(ciphertext_char, key_char):
     ch, cl = splitByte(ciphertext_char)
@@ -96,18 +89,12 @@ def main():
 
             possibleKeyMatrix.append(possibleKeyCharacterVector)
             possiblePlaintextMatrix.append(possiblePlaintextVector)
-    
-    candidates = []
-    for row in possibleKeyMatrix:
-        max_val = 0
-        best_fit = ""
-        for char in row:
-            text, valid, invalid = decryptTextUsingKey(text, char)
-            if len (valid) > max_val:
-                max_val = len(valid)
-                best_fit = char
-        candidates.append((best_fit, max_val))
-    candidates.sort(key=lambda tup: tup[1])
-    print candidates
 
-main()
+def getText():
+    text = ""
+    for line in sys.stdin:
+        text += line
+    return text
+
+text = getText()
+print decryptTextUsingKey(text, 'P/' + chr(0x08) + chr(0x7c) + chr(0x5f) + chr(0x30) + chr(0x00))
