@@ -1,4 +1,4 @@
-To run the code on a given machine, using python2, pass the ciphertext into stdin to the program, or specify a file to be opened using -f.
+To run the code on a given machine, using python2, pass the ciphertext into stdin to the program, or specify a file to be opened using -f. 
 
 Example:
 
@@ -23,3 +23,6 @@ To use a key that is not hardcoded into the program, pass the desired key (as a 
 Example:
 
 cat ciphertext1 | python assignment1.py -k=test123
+
+
+Use python assigment1.py -h or --help for help.

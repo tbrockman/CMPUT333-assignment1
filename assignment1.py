@@ -135,7 +135,7 @@ def createPossiblePlaintextAndKeyMatrices():
     return possiblePlaintextMatrix, possibleKeyMatrix
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Decrypt ciphertext giving from stdin using a specified key, following the encryption scheme specified in CMPUT 333 Assigment 1")
+    parser = argparse.ArgumentParser(description="Decrypt ciphertext giving from stdin/file using a specified key, following the encryption scheme specified in CMPUT 333 Assigment 1")
     parser.add_argument('-k', '--key', help='Specify a key to use to decrypt the ciphertext passed from stdin.')
     parser.add_argument('-knum', '--key-number', help='Use an already found key [1, 2, 3] corresponding to the keys for Ciphertext1, Ciphertext2, and Ciphertext3 respectively.')
     parser.add_argument('-f', '--file', help='A file name to be used as input instead of stdin.')
