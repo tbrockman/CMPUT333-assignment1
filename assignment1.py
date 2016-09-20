@@ -111,12 +111,10 @@ def isPrintableAscii(char):
 def isValidAscii(char):
     return ord(char) >= 0 and ord(char) <= 127
 
-def createPossiblePlaintextAndKeyMatrices():
-    text = ""
+def createPossiblePlaintextAndKeyMatrices(text):
     possibleKeyMatrix = []
     possiblePlaintextMatrix = []
-    for line in sys.stdin:
-        text += line
+    for line in text:
         for byte in line:
             ch, cl = splitByte(byte)
             ch_indices = findIndices2dArray(hashMap, ch)
@@ -127,7 +125,7 @@ def createPossiblePlaintextAndKeyMatrices():
                 for ph, kl in ch_indices:
                     plain_char = chr(ph << 4 | pl)
                     key_char = chr(kh << 4 | kl)
-                    if isPrintableAscii(plain_char) and isValidAscii(key_char):
+                    if isPrintableAscii(key_char):
                         possiblePlaintextVector.append(plain_char)
                         possibleKeyCharacterVector.append(key_char)
             possibleKeyMatrix.append(possibleKeyCharacterVector)
@@ -139,6 +137,7 @@ if __name__ == "__main__":
     parser.add_argument('-k', '--key', help='Specify a key to use to decrypt the ciphertext passed from stdin.')
     parser.add_argument('-knum', '--key-number', help='Use an already found key [1, 2, 3] corresponding to the keys for Ciphertext1, Ciphertext2, and Ciphertext3 respectively.')
     parser.add_argument('-f', '--file', help='A file name to be used as input instead of stdin.')
+    parser.add_argument('-a', '--analyze', action='store_true', help='Run on file input in analysis mode (for part 2).')
     args = parser.parse_args()
 
     if args.file:
@@ -146,13 +145,19 @@ if __name__ == "__main__":
     else:
         f = sys.stdin
 
+    # TODO: This only works for newline seperated files, which ciphertext2 is not
     text = ""
     for line in f:
         text += line
 
-    if args.key:
-        print decryptTextUsingKey(text, args.key)
-    elif args.key_number:
-        print decryptTextUsingKey(text, keys[int(args.key_number) - 1])
+    if args.analyze:
+        possiblePlaintextMatrix, possibleKeyMatrix = createPossiblePlaintextAndKeyMatrices(text)
+
     else:
-        print decryptTextUsingKey(text, keys[0])
+
+        if args.key:
+            print decryptTextUsingKey(text, args.key)
+        elif args.key_number:
+            print decryptTextUsingKey(text, keys[int(args.key_number) - 1])
+        else:
+            print decryptTextUsingKey(text, keys[0])
