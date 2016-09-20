@@ -92,6 +92,17 @@ def decrypt(ciphertext_char, key_char):
     pl = findIndiceKnowingColumn(hashMap, kh, cl)
     return chr(ph << 4 | pl)
 
+def tryToMatchFileFormats(text, file_formats, possible_key_matrix):
+    key_format_tuples = []
+    for i in range(len(file_formats)):
+        key = matchFileFormatToCiphertext(file_formats[i], text)
+        if (key):
+            key_format_tuples.append((key, file_formats[i]))
+    return key_format_tuples
+
+def matchFileFormatToCiphertext(file_format, text):
+    return 0
+
 def findIndiceKnowingColumn(arr, col, item):
     for p in range(len(arr)):
         if arr[p][col] == item:
@@ -150,7 +161,13 @@ if __name__ == "__main__":
         text += line
 
     if args.analyze:
-        possiblePlaintextMatrix, possibleKeyMatrix = createPossiblePlaintextAndKeyMatrices(text)
+        # Only need to parse amount of text equal to the length of the longest key#
+        file_formats = []
+        max_necessary_slice = max(file_formats, key=len)
+        sliced_text = text[0:max_necessary_slice]
+        poss_plaintxt_matrix, poss_key_matrix = createPossiblePlaintextAndKeyMatrices(sliced_text)
+        valid_formats = tryToMatchFileFormats(sliced_text, file_formats, poss_key_matrix)
+        
 
     else:
 
