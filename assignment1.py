@@ -141,11 +141,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.file:
-        f = open(args.file, 'r')
+        f = open(args.file, 'r+')
     else:
         f = sys.stdin
 
-    # TODO: This only works for newline seperated files, which ciphertext2 is not
     text = ""
     for line in f:
         text += line
