@@ -1,28 +1,14 @@
-To run the code on a given machine, using python2, pass the ciphertext into stdin to the program, or specify a file to be opened using -f. 
+Part 1
+----------
 
-Example:
+Since the password was found mainly using online tools for frequency analysis and by hand, the only thing that the code was used for was for decryption. To print the decrypted file using the python program, in the programs directory type either (using python2):
 
-cat ciphertext1 | python assignment1.py
+python assignment1.py --file=cipertext1 --key-num=1
 
 or
 
-python assignment1.py -f=ciphertext1
-
-The keys are hardcoded into the program, to use a ciphertexts corresponding key, use the -knum or --key-number command line argument. The first key will be used by default.
-
-Example:
-
-cat ciphertext2 | python assignment1.py -knum=2
-
-or python assignment1.py --file=ciphertext3 --key-number=3
-
-etc.
-
-To use a key that is not hardcoded into the program, pass the desired key (as a string) to the -k or --key command line argument.
-
-Example:
-
-cat ciphertext1 | python assignment1.py -k=test123
+cat ciphertext1 | python assignment1.py --key-num=1
 
 
-Use python assigment1.py -h or --help for help.
+Part 2
+----------
