@@ -92,16 +92,37 @@ def decrypt(ciphertext_char, key_char):
     pl = findIndiceKnowingColumn(hashMap, kh, cl)
     return chr(ph << 4 | pl)
 
+def findKeyCharKnowingPlaintext(plaintext_char, ciphertext_char):
+    ch, cl = splitByte(ciphertext_char)
+    ph, pl = splitByte(plaintex_char)
+    kh = findIndiceKnowingRow(hashMap, pl, cl)
+    kl = findIndiceKnowingRow(hashMap, ph, ch)
+    return chr(kh << 4 | kl)
+
 def tryToMatchFileFormats(text, file_formats, possible_key_matrix):
     key_format_tuples = []
     for i in range(len(file_formats)):
-        key = matchFileFormatToCiphertext(file_formats[i], text)
+        key = matchFileFormatToCiphertext(file_formats[i], text, possible_key_matrix[i])
         if (key):
             key_format_tuples.append((key, file_formats[i]))
     return key_format_tuples
 
-def matchFileFormatToCiphertext(file_format, text):
-    return 0
+def matchFileFormatToCiphertext(file_format, text, key_character_vector):
+    key = ""
+    for i in range(len(file_format)):
+        if (file_format[i] == 'n'):
+            key += n
+        else:
+            key_char = findKeyCharKnowingPlaintext(file_format[i], text[i])
+            if isPrintableAscii(key_char) and key_char in key_character_vector:
+                key += key_char
+            else:
+                return None
+
+def findIndiceKnowingRow(arr, row, item):
+    for k in range(len(arr[0])):
+        if arr[row][k] == item:
+            return k
 
 def findIndiceKnowingColumn(arr, col, item):
     for p in range(len(arr)):
@@ -123,25 +144,25 @@ def isValidAscii(char):
     return ord(char) >= 0 and ord(char) <= 127
 
 def createPossiblePlaintextAndKeyMatrices(text):
-    possibleKeyMatrix = []
-    possiblePlaintextMatrix = []
+    possible_key_matrix = []
+    possible_plaintext_matrix = []
     for line in text:
         for byte in line:
             ch, cl = splitByte(byte)
             ch_indices = findIndices2dArray(hashMap, ch)
             cl_indices = findIndices2dArray(hashMap, cl)
-            possibleKeyCharacterVector = []
-            possiblePlaintextVector = []
+            possible_key_vector = []
+            possible_plaintext_vector = []
             for pl, kh in cl_indices:
                 for ph, kl in ch_indices:
                     plain_char = chr(ph << 4 | pl)
                     key_char = chr(kh << 4 | kl)
                     if isPrintableAscii(key_char):
-                        possiblePlaintextVector.append(plain_char)
-                        possibleKeyCharacterVector.append(key_char)
-            possibleKeyMatrix.append(possibleKeyCharacterVector)
-            possiblePlaintextMatrix.append(possiblePlaintextVector)
-    return possiblePlaintextMatrix, possibleKeyMatrix
+                        possible_plaintext_vector.append(plain_char)
+                        possible_key_vector.append(key_char)
+            possible_key_matrix.append(possible_key_vector)
+            possible_plaintext_matrix.append(possible_plaintext_vector)
+    return possible_plaintext_matrix, possible_key_matrix
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Decrypt ciphertext given from stdin/file using a specified key, following the encryption scheme specified in CMPUT 333 Assigment 1")
@@ -167,6 +188,7 @@ if __name__ == "__main__":
         sliced_text = text[0:max_necessary_slice]
         poss_plaintxt_matrix, poss_key_matrix = createPossiblePlaintextAndKeyMatrices(sliced_text)
         valid_formats = tryToMatchFileFormats(sliced_text, file_formats, poss_key_matrix)
+        print valid_formats
         
 
     else:
