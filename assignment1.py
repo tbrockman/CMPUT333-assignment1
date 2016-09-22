@@ -94,7 +94,7 @@ def decrypt(ciphertext_char, key_char):
 
 def findKeyCharKnowingPlaintext(plaintext_char, ciphertext_char):
     ch, cl = splitByte(ciphertext_char)
-    ph, pl = splitByte(plaintex_char)
+    ph, pl = splitByte(plaintext_char)
     kh = findIndiceKnowingRow(hashMap, pl, cl)
     kl = findIndiceKnowingRow(hashMap, ph, ch)
     return chr(kh << 4 | kl)
@@ -185,7 +185,7 @@ if __name__ == "__main__":
         # Only need to parse amount of text equal to the length of the longest key#
         file_formats = []
         max_necessary_slice = max(file_formats, key=len)
-        sliced_text = text[0:max_necessary_slice]
+        sliced_text = text[0:len(max_necessary_slice)]
         poss_plaintxt_matrix, poss_key_matrix = createPossiblePlaintextAndKeyMatrices(sliced_text)
         valid_formats = tryToMatchFileFormats(sliced_text, file_formats, poss_key_matrix)
         print valid_formats
