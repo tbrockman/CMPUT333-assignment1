@@ -1,5 +1,9 @@
 import sys
 import argparse
+import itertools
+import os
+from cStringIO import StringIO
+from PIL import Image
 
 hashMap = [
    [0xf, 0x7, 0x6, 0x4, 0x5, 0x1, 0x0, 0x2, 0x3, 0xb, 0xa, 0x8, 0x9, 0xd, 0xc, 0xe],
@@ -99,6 +103,13 @@ def findKeyCharKnowingPlaintext(plaintext_char, ciphertext_char):
     kl = findIndiceKnowingRow(hashMap, ph, ch)
     return chr(kh << 4 | kl)
 
+def check_image_valid(image):
+    try:
+        Image.open(image)
+    except IOError:
+        return False
+    return True
+
 def tryToMatchFileFormats(text, file_formats, possible_key_matrix):
     key_format_tuples = []
     for i in range(len(file_formats)):
@@ -115,11 +126,33 @@ def matchFileFormatToCiphertext(file_format, text, possible_key_matrix):
         else:
             key_character_vector = possible_key_matrix[i]
             key_char = findKeyCharKnowingPlaintext(file_format[i], text[i])
-            if isPrintableAscii(key_char) and key_char in key_character_vector:
+            if isPrintableAscii(key_char): #and key_char in key_character_vector:
                 key += key_char
             else:
                 return None
     return key
+
+def filterToGeographicCoordinate(index, possible_key_vector, key):
+    return filter(lambda x: x.isdigit(), possible_key_vector)
+
+def generateCombinationsOfLists(list1, list2):
+    combinations = []
+    for word in list1:
+        for letter in list2:
+            combinations.append(word + letter)
+    return combinations
+
+def testAndGenerateKeyCombinations(key, possible_key_matrix):
+    list_key = list(key)
+    for i in range(len(key)):
+        if (key[i] == 'n'):
+            list_key[i] = filterToGeographicCoordinate(i, possible_key_matrix[i], key)
+
+    current_combinations = list_key[0]
+    for j in range(1, len(list_key)):
+        current_combinations = generateCombinationsOfLists(current_combinations, list_key[j])
+
+    return current_combinations
 
 def findIndiceKnowingRow(arr, row, item):
     for k in range(len(arr[0])):
@@ -199,13 +232,25 @@ if __name__ == "__main__":
 
     if args.analyze:
         # Only need to parse amount of text equal to the length of the longest key#
-        test_formats = ['00', 'nnnnnnnnnnn000000000000000000000000000000000000000000000000', 'BEBAFECA', '00014244', '00014454', '00010000', '00000100', 'nnnn667479703367', '1F9D', '1FA0', '4241434B4D494B454449534B', '425A68', '474946383761', '474946383961', '49492A00', '4D4D002A', '49492A00100000004352', '802A5FD7', '524E4301', '524E4302', '53445058', '58504453', '762F3101', '425047FB', 'FFD8FFDB', 'FFD8FFE0nnnn4A4649460001', 'FFD8FFE1nnnn457869660000', '464F524Dnnnnnnnn494C424D', '464F524Dnnnnnnnn38535658', '464F524Dnnnnnnnn4143424D', '464F524Dnnnnnnnn414E424D', '464F524Dnnnnnnnn414E494D', '464F524Dnnnnnnnn46415858', '464F524Dnnnnnnnn46545854', '464F524Dnnnnnnnn534D5553', '464F524Dnnnnnnnn434D5553', '464F524Dnnnnnnnn5955564E', '464F524Dnnnnnnnn46414E54', '464F524Dnnnnnnnn41494646', '494E4458', '4C5A4950', '4D5A', '504B0304', '504B0506', '504B0708', '526172211A0700', '526172211A070100', '7F454C46', '89504E470D0A1A0A', 'CAFEBABE', 'EFBBBF', 'FEEDFACE', 'FEEDFACF', 'CEFAEDFE', 'CFFAEDFE', 'FFFE', 'FFFE0000', '25215053', '25504446', '3026B2758E66CF11A6D900AA0062CE6C', '2453444930303031', '4F676753', '38425053', '52494646nnnnnnnn57415645', '52494646nnnnnnnn41564920', 'FFFB', '494433', '424D', '53494D504C452020', '3D202020202020202020202020202020202020202054', '664C6143', '4D546864', 'D0CF11E0A1B11AE1', '6465780A30333500', '4B444D', '43723234', '41474433', '05070000424F424F0507000000000000000000000001', '0607E100424F424F0607E10000000000000000000001', '455202000000', '8B455202000000', '7801730D626260', '78617221', '504D4F43434D4F43', '4E45531A', '7573746172003030', '7573746172202000', '746F7833', '4D4C5649', '44434D0150413330', '377ABCAF271C', '1F8B', '04224D18', '4D534346', '464C4946', '1A45DFA3', '4D494C20', '41542654464F524Dnnnnnnnn444A56', '3082', '774F4646', '774F4632', '3c3f786d6c20']
-        file_formats = convertFormatsToChars(test_formats)
+        #test_formats = ['00', 'nnnnnnnnnnn000000000000000000000000000000000000000000000000', 'BEBAFECA', '00014244', '00014454', '00010000', '00000100', 'nnnn667479703367', '1F9D', '1FA0', '4241434B4D494B454449534B', '425A68', '474946383761', '474946383961', '49492A00', '4D4D002A', '49492A00100000004352', '802A5FD7', '524E4301', '524E4302', '53445058', '58504453', '762F3101', '425047FB', 'FFD8FFDB', 'FFD8FFE0nnnn4A4649460001', 'FFD8FFE1nnnn457869660000', '464F524Dnnnnnnnn494C424D', '464F524Dnnnnnnnn38535658', '464F524Dnnnnnnnn4143424D', '464F524Dnnnnnnnn414E424D', '464F524Dnnnnnnnn414E494D', '464F524Dnnnnnnnn46415858', '464F524Dnnnnnnnn46545854', '464F524Dnnnnnnnn534D5553', '464F524Dnnnnnnnn434D5553', '464F524Dnnnnnnnn5955564E', '464F524Dnnnnnnnn46414E54', '464F524Dnnnnnnnn41494646', '494E4458', '4C5A4950', '4D5A', '504B0304', '504B0506', '504B0708', '526172211A0700', '526172211A070100', '7F454C46', '89504E470D0A1A0A', 'CAFEBABE', 'EFBBBF', 'FEEDFACE', 'FEEDFACF', 'CEFAEDFE', 'CFFAEDFE', 'FFFE', 'FFFE0000', '25215053', '25504446', '3026B2758E66CF11A6D900AA0062CE6C', '2453444930303031', '4F676753', '38425053', '52494646nnnnnnnn57415645', '52494646nnnnnnnn41564920', 'FFFB', '494433', '424D', '53494D504C452020', '3D202020202020202020202020202020202020202054', '664C6143', '4D546864', 'D0CF11E0A1B11AE1', '6465780A30333500', '4B444D', '43723234', '41474433', '05070000424F424F0507000000000000000000000001', '0607E100424F424F0607E10000000000000000000001', '455202000000', '8B455202000000', '7801730D626260', '78617221', '504D4F43434D4F43', '4E45531A', '7573746172003030', '7573746172202000', '746F7833', '4D4C5649', '44434D0150413330', '377ABCAF271C', '1F8B', '04224D18', '4D534346', '464C4946', '1A45DFA3', '4D494C20', '41542654464F524Dnnnnnnnn444A56', '3082', '774F4646', '774F4632', '3c3f786d6c20']
+        #file_formats = convertFormatsToChars(test_formats)
+        file_formats = ['53.52n563N,-133.49nnnnW']
         max_necessary_slice = max(file_formats, key=len)
-        sliced_text = text[0:len(max_necessary_slice)]
+        sliced_text = text
         poss_plaintxt_matrix, poss_key_matrix = createPossiblePlaintextAndKeyMatrices(sliced_text)
-        valid_formats = tryToMatchFileFormats(sliced_text, file_formats, poss_key_matrix)
-        print valid_formats
+        #valid_formats = tryToMatchFileFormats(sliced_text, file_formats, poss_key_matrix)
+        keys = testAndGenerateKeyCombinations('53.5nn563N,-113.5nnnnnW', poss_key_matrix)
+        for i in range(len(keys)):
+            path = 'test' + str(i) + '.jpeg'
+            buff = decryptTextUsingKey(text, keys[i])
+            file_like_stream = StringIO(buff)
+            if check_image_valid(file_like_stream):
+                print 'Success!!!!!'
+                f = open(path, 'w')
+                f.write(decryptTextUsingKey(text, keys[i]))
+                f.close()
+
+        #print valid_formats
 
 
     else:
