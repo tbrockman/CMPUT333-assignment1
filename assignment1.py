@@ -2,6 +2,7 @@ import sys
 import argparse
 import itertools
 import os
+import math
 from cStringIO import StringIO
 from PIL import Image
 
@@ -239,7 +240,8 @@ if __name__ == "__main__":
         sliced_text = text
         poss_plaintxt_matrix, poss_key_matrix = createPossiblePlaintextAndKeyMatrices(sliced_text)
         #valid_formats = tryToMatchFileFormats(sliced_text, file_formats, poss_key_matrix)
-        keys = testAndGenerateKeyCombinations('53.53n563N,-113.5nnnnnW', poss_key_matrix)
+        keys = testAndGenerateKeyCombinations('53.53n563N,-113.52nnnnW', poss_key_matrix)
+
         for i in range(len(keys)):
             path = 'test' + str(i) + '.jpeg'
             buff = decryptTextUsingKey(text, keys[i])
