@@ -12,4 +12,4 @@ In CBC mode it resulted in a mangled block 3 and a replacement of one plaintext 
 
 In CFB mode it resulted in a mangled block 4 and a replacement of one plaintext character at position 19. Because in decryption the ciphertext of a given block X is used as input for the block cipher of block X+1 (resulting in a different output from the block cipher), a one character change in the ciphertext results in a change of the corresponding index in the same block, as well as a mangled next block.
 
-In ECB mode it resulted in only a mangled block 3. This is because all blocks are encrypted and decrypted separately from one another, so a change in one block does not affect any others, but because the ciphertext is passed a block cipher a one character change affects the entire output of that block.
+In ECB mode it resulted in only a mangled block 3. This is because all blocks are encrypted and decrypted independently of one another, so a change in one block does not affect any others, but because the ciphertext is passed a block cipher a one character change affects the entire output of that block.
