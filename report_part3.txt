@@ -1,0 +1,15 @@
+1. DES encryption in OFB and CFB modes both resulted in a file the same size as the plaintext. CBC and ECB resulted in a file 8 bytes longer. The file encrypted in CBC-mode is 8 bytes longer due to the inclusion of its Initilization Vector (initial random number used to XOR plaintext before encryption), whereas ECB is 8 bytes longer due to padding its last block to 64-bits. The files encrypted in OFB and CFB modes are likely the same size because they have had their initilization vectors omitted.
+
+Since ECB splits files into 8-byte blocks and our input was the same 8 bytes repeated, the resulting ciphertext is also a repetition of 8-blocks.
+
+The first 8 bytes of the OFB and CFB are the same because in both cases they take the same secret key and XOR it with the plaintext. However, the following bytes are different because where in CFB mode the resulting ciphertext is used in the next steps block cipher encryption, in OFB mode only the block cipher encrypted key (with initialization vector if it exists) is passed to the next step.
+
+Assuming from it's length that CBC mode included an initilization vector, the reason its first line differs from CFB and OFB is due to the inclusion of the vector (whether it be the vector itself, or that the plaintext was XOR'd with the vector)
+
+2. In OFB mode it resulted in a replacement of one plaintext character at position 19. This is because the decryption simply does an XOR on the ciphertext using the corresponding one-time pad, so the change of one byte of input doesn't affect the output of another, only the corresponding byte of output is changed.
+
+In CBC mode it resulted in a mangled block 3 and a replacement of one plaintext character at position 27. This is because in decryption the ciphertext is passed with the key to the block cipher, and the one character change causes a completely different 8 byte value to be returned from the block cipher, which is then XOR'd with the plaintext causing an equally mangled output. The same ciphertext is then used in the next step and XOR'd with the next block, resulting in a change at the index of our modified character, in block 4.
+
+In CFB mode it resulted in a mangled block 4 and a replacement of one plaintext character at position 19. Because in decryption the ciphertext of a given block X is used as input for the block cipher of block X+1 (resulting in a different output from the block cipher), a one character change in the ciphertext results in a change of the corresponding index in the same block, as well as a mangled next block.
+
+In ECB mode it resulted in only a mangled block 3. This is because all blocks are encrypted and decrypted independently of one another, so a change in one block does not affect any others, but because the ciphertext is passed a block cipher a one character change affects the entire output of that block.
