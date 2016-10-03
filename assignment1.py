@@ -104,10 +104,11 @@ def findKeyCharKnowingPlaintext(plaintext_char, ciphertext_char):
     kl = findIndiceKnowingRow(hashMap, ph, ch)
     return chr(kh << 4 | kl)
 
-def check_image_valid(image):
+def check_image_valid(image, index):
     try:
         test = Image.open(image)
-        test.show()
+        test.save('decrypted_' + str(index) + '.jpeg')
+
     except IOError:
         return False
     return True
@@ -244,28 +245,25 @@ if __name__ == "__main__":
         keys = testAndGenerateKeyCombinations('53.503563N,-113.528894W', poss_key_matrix)
 
         for i in range(len(keys)):
-            print keys[i], i / float(len(keys)) * 100
-            path = 'test' + str(i) + '.jpg'
-            buff = decryptTextUsingKey(text, keys[i])
-            print buff[0:400]
             file_like_stream = StringIO(buff)
 
-            if check_image_valid(file_like_stream):
+            if check_image_valid(file_like_stream, i):
                 print 'Success!!!!!'
                 print keys[i]
-                f = open(path, 'w')
-                f.write(buff)
-                f.close()
-
 
         #print valid_formats
-
 
     else:
 
         if args.key:
             print decryptTextUsingKey(text, args.key)
         elif args.key_number:
+            if (int(args.key_number) == 2):
+                decrypted = decryptTextUsingKey(text, keys[1])
+                file_like_stream = StringIO(decrypted)
+                img = Image.open(file_like_stream)
+                img.show()
+
             print decryptTextUsingKey(text, keys[int(args.key_number) - 1])
         else:
             print decryptTextUsingKey(text, keys[0])
